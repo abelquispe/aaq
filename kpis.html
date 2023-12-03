@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/js/gauge.min.js"></script>
+    <style>
+        /* Estilo para el título */
+        .title {
+            text-align: center;
+            background-color: #000033; /* Color de fondo azul marino */
+            color: white; /* Color de texto blanco */
+            font-weight: bold; /* Texto en negrita */
+            padding: 20px; /* Espaciado interno para el título */
+            font-size: 24px; /* Tamaño de fuente más pequeño */
+        }
+
+        /* Estilo para el fondo de la página */
+        body {
+            background-color: #000033; /* Color de fondo azul marino para la página completa */
+            margin: 0; /* Elimina el margen predeterminado del cuerpo */
+            padding: 0; /* Elimina el espacio de relleno predeterminado del cuerpo */
+        }
+
+        /* Estilo para el medidor (gauge) */
+        .gauge-label {
+            fill: white; /* Color de las letras del medidor en blanco */
+        }
+
+        /* Estilo para el título del medidor */
+        .gauge-title {
+            text-align: center;
+            color: white; /* Color de texto blanco */
+            font-size: 14px; /* Tamaño de fuente más pequeño para el título */
+        }
+
+        /* Estilo para la tabla */
+        .table {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Estilo para las filas de la tabla */
+        .table-row {
+            display: table-row;
+        }
+
+        /* Estilo para las celdas de la tabla */
+        .table-cell {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #000;
+            text-align: center;
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            width: 3em;
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5em;
+            font-size: 2em;
+            color: white;
+            z-index: 1001;
+        }
+        .menu-panel {
+            position: fixed;
+            top: 3em;
+            left: 0;
+            width: 250px;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            z-index: 1000;
+            padding-top: 20px;
+            display: none;
+        }
+        .menu-panel a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu-panel a:hover {
+            color: #f1f1f1;
+        }
+        .menu-btn:hover + .menu-panel,
+        .menu-panel:hover {
+            display: block;
+        }
+        .menu-btn:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Título centrado -->
+    <div class="title">KPIs - Área de Filtros de Concentrado de Cobre</div>
+
+    <!-- Crear la tabla -->
+    <div class="table">
+        <!-- Fila 1 -->
+        <div class="table-row">
+            <!-- Celda 1A (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">% Humedad - Filtro 01</div>
+            </div>
+            <!-- Celda 1B (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">% Humedad - Filtro 02</div>
+            </div>
+            <!-- Celda 1C (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">% Humedad - Filtro 03</div>
+            </div>
+        </div>
+        <!-- Fila 2 -->
+        <div class="table-row">
+            <!-- Celda 2A (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge1"></canvas>
+            </div>
+            <!-- Celda 2B (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge2"></canvas>
+            </div>
+            <!-- Celda 2C (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge3"></canvas>
+            </div>
+        </div>
+
+
+        <!-- Fila 3 - Otros KPIs -->
+        <div class="table-row">
+            <!-- Celda 3A (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">Peso del Keke - Filtro 01</div>
+            </div>
+            <!-- Celda 3B (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">Peso del Keke - Filtro 02</div>
+            </div>
+            <!-- Celda 3C (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">Peso del Keke - Filtro 03</div>
+            </div>
+        </div>
+        <!-- Fila 4 - Otros KPIs -->
+        <div class="table-row">
+            <!-- Celda 4A (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge4"></canvas>
+            </div>
+            <!-- Celda 4B (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge5"></canvas>
+            </div>
+            <!-- Celda 4C (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge6"></canvas>
+            </div>
+        </div>
+
+
+
+        <!-- Fila 5 - Otra categoría de KPIs -->
+        <div class="table-row">
+            <!-- Celda 5A (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">KPI 4</div>
+            </div>
+            <!-- Celda 5B (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">KPI 5</div>
+            </div>
+            <!-- Celda 5C (Título) -->
+            <div class="table-cell">
+                <div class="gauge-title">KPI 6</div>
+            </div>
+        </div>
+        <!-- Fila 6 - Otra categoría de KPIs -->
+        <div class="table-row">
+            <!-- Celda 6A (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge7"></canvas>
+            </div>
+            <!-- Celda 6B (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge8"></canvas>
+            </div>
+            <!-- Celda 6C (Medidor) -->
+            <div class="table-cell">
+                <canvas id="gauge9"></canvas>
+            </div>
+        </div>
+
+
+        <div class="menu-btn">☰</div>
+        <div class="menu-panel">
+            <a href="/">Inicio</a>
+            <a href="/resumen">Resumen ejecutivo</a>
+            <a href="/kpis">KPIs principales a primera vista</a>
+            <a href="#current-analysis">Análisis Actual</a>
+            <a href="#production">Producción</a>
+            <a href="#processed-tons">Toneladas procesadas</a>
+            <a href="#average-cycle-time">Tiempo de ciclo promedio</a>
+            <a href="#equipment-availability">Disponibilidad y utilización de equipos</a>
+        </div>
+
+
+        
+    </div>
+
+    <script>
+        // Configuración del gráfico de medidor
+        var opts = {
+            angle: 0, // Ángulo inicial
+            lineWidth: 0.2, // Ancho de línea
+            radiusScale: 1, // Escala del radio
+            pointer: {
+                length: 0.6, // Longitud del puntero
+                strokeWidth: 0.035, // Ancho de línea del puntero
+                color: '#ffffff' // Color del puntero en blanco
+            },
+            staticLabels: {
+                font: '10px sans-serif', // Fuente de etiquetas estáticas
+                labels: [5, 6, 7.9, 8.9, 10], // Valores de etiquetas estáticas
+                color: '#ffffff' // Color de etiquetas estáticas en blanco
+            },
+            staticZones: [
+                {strokeStyle: '#F03E3E', min: 5, max: 6}, // Zona roja
+                {strokeStyle: '#FFDD00', min: 6.1, max: 7.8}, // Zona amarilla
+                {strokeStyle: '#30B32D', min: 7.9, max: 8.8}, // Zona verde
+                {strokeStyle: '#F03E3E', min: 8.9, max: 10} // Zona roja
+            ],
+            limitMax: true,     // Limitar el valor máximo a 10
+            limitMin: true,     // Limitar el valor mínimo a 5
+            strokeColor: '#E0E0E0',   // Color del borde
+            generateGradient: true,  // Generar un degradado de colores
+            highDpiSupport: true     // Soporte para alta resolución
+        };
+        
+        // Crear los medidores
+        var target1 = document.getElementById('gauge1');
+        var gauge1 = new Gauge(target1).setOptions(opts);
+        gauge1.maxValue = 10;
+        gauge1.setMinValue(5);
+        gauge1.animationSpeed = 32;
+
+        var target2 = document.getElementById('gauge2');
+        var gauge2 = new Gauge(target2).setOptions(opts);
+        gauge2.maxValue = 10;
+        gauge2.setMinValue(5);
+        gauge2.animationSpeed = 32;
+
+        var target3 = document.getElementById('gauge3');
+        var gauge3 = new Gauge(target3).setOptions(opts);
+        gauge3.maxValue = 10;
+        gauge3.setMinValue(5);
+        gauge3.animationSpeed = 32;
+
+        // Obtén los valores del KPI desde Flask y actualiza los medidores
+        var valor_kpi1 = {{valor_kpi1}};
+
+        var valor_kpi2 = {{valor_kpi2}};
+
+        var valor_kpi3 = {{valor_kpi3}};
+
+        gauge1.set(valor_kpi1);
+        gauge2.set(valor_kpi2);
+        gauge3.set(valor_kpi3);
+    </script>
+
+    <script>
+        // Configuración para los nuevos gauges con rangos de colores personalizados
+        var opts2 = {
+            angle: 0,
+            lineWidth: 0.2,
+            radiusScale: 1,
+            pointer: {
+                length: 0.6,
+                strokeWidth: 0.035,
+                color: '#ffffff'
+            },
+            staticLabels: {
+                font: '10px sans-serif',
+                labels: [0, 5000, 6500, 8000, 9500, 12000],
+                color: '#ffffff'
+            },
+            staticZones: [
+                { strokeStyle: '#FF0000', min: 0, max: 4999 },       // Rango rojo fuerte
+                { strokeStyle: '#FFA500', min: 5000, max: 6500 },   // Rango naranja
+                { strokeStyle: '#FFFF00', min: 6501, max: 8000 },   // Rango amarillo
+                { strokeStyle: '#90EE90', min: 8001, max: 9500 },   // Rango verde claro
+                { strokeStyle: '#008000', min: 9501, max: 12000 }   // Rango verde oscuro
+            ],
+            limitMax: true,
+            limitMin: true,
+            strokeColor: '#E0E0E0',
+            generateGradient: true,
+            highDpiSupport: true
+        };
+
+        // Crear los nuevos gauges
+        var target4 = document.getElementById('gauge4');
+        var gauge4 = new Gauge(target4).setOptions(opts2);
+        gauge4.maxValue = 12000;
+        gauge4.setMinValue(0);
+        gauge4.animationSpeed = 32;
+
+        var target5 = document.getElementById('gauge5');
+        var gauge5 = new Gauge(target5).setOptions(opts2);
+        gauge5.maxValue = 12000;
+        gauge5.setMinValue(0);
+        gauge5.animationSpeed = 32;
+
+        var target6 = document.getElementById('gauge6');
+        var gauge6 = new Gauge(target6).setOptions(opts2);
+        gauge6.maxValue = 12000;
+        gauge6.setMinValue(0);
+        gauge6.animationSpeed = 32;
+
+        // Obtener valores para los nuevos KPIs desde Flask y actualizar los gauges
+        var valor_kpi4 = 3500; // Cambia estos valores según tus datos
+        var valor_kpi5 = 6000; // Cambia estos valores según tus datos
+        var valor_kpi6 = 7500; // Cambia estos valores según tus datos
+
+        gauge4.set(valor_kpi4);
+        gauge5.set(valor_kpi5);
+        gauge6.set(valor_kpi6);
+    </script>
+
+    
+
+
+
+    <script>
+        // Configuración para los nuevos gauges de la tercera fila
+        var opts3 = {
+            angle: 0,
+            lineWidth: 0.2,
+            radiusScale: 1,
+            pointer: {
+                length: 0.6,
+                strokeWidth: 0.035,
+                color: '#ffffff'
+            },
+            staticLabels: {
+                font: '10px sans-serif',
+                labels: [0, 50, 100, 150, 200],
+                color: '#ffffff'
+            },
+            staticZones: [
+                {strokeStyle: '#F03E3E', min: 0, max: 50},
+                {strokeStyle: '#FFDD00', min: 51, max: 100},
+                {strokeStyle: '#30B32D', min: 101, max: 150},
+                {strokeStyle: '#F03E3E', min: 151, max: 200}
+            ],
+            limitMax: true,
+            limitMin: true,
+            strokeColor: '#E0E0E0',
+            generateGradient: true,
+            highDpiSupport: true
+        };
+
+        // Crear los nuevos gauges de la tercera fila
+        var target7 = document.getElementById('gauge7');
+        var gauge7 = new Gauge(target7).setOptions(opts3);
+        gauge7.maxValue = 200;
+        gauge7.setMinValue(0);
+        gauge7.animationSpeed = 32;
+
+        var target8 = document.getElementById('gauge8');
+        var gauge8 = new Gauge(target8).setOptions(opts3);
+        gauge8.maxValue = 200;
+        gauge8.setMinValue(0);
+        gauge8.animationSpeed = 32;
+
+        var target9 = document.getElementById('gauge9');
+        var gauge9 = new Gauge(target9).setOptions(opts3);
+        gauge9.maxValue = 200;
+        gauge9.setMinValue(0);
+        gauge9.animationSpeed = 32;
+
+        // Obtener valores para los nuevos KPIs de la tercera fila desde Flask y actualizar los gauges
+        var valor_kpi7 = 100
+        var valor_kpi8 = 100
+        var valor_kpi9 = 100
+
+        gauge7.set(valor_kpi7);
+        gauge8.set(valor_kpi8);
+        gauge9.set(valor_kpi9);
+    </script>
+
+
+</body>
+</html>
+

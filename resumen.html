@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen - Área de Filtros de Concentrado de Cobre</title>
+
+    <!-- Google Charts Library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- Bootstrap CSS for styling and responsive behavior -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- Custom styles for this template -->
+    <style>
+        .menu-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            width: 3em;
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5em;
+            font-size: 2em;
+            color: white;
+            z-index: 1001;
+        }
+        .menu-panel {
+            position: fixed;
+            top: 3em;
+            left: 0;
+            width: 250px;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            z-index: 1000;
+            padding-top: 20px;
+            display: none;
+        }
+        .menu-panel a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu-panel a:hover {
+            color: #f1f1f1;
+        }
+        .menu-btn:hover + .menu-panel,
+        .menu-panel:hover {
+            display: block;
+        }
+        .menu-btn:hover {
+            background-color: #333;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000033; /* Azul marino, ajusta el código de color según sea necesario */
+            color: #333;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .titulo {
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-left: 30px;
+            color: white; /* Color del título de la cabecera en blanco */
+        }
+        .logo {
+            height: 50px;
+            border-radius: 10px;
+        }
+        .cuadrante {
+            background-color: white; /* Fondo del div en blanco */
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .chart-title {
+            color: white; /* Color del título de la gráfica en blanco */
+            text-align: center;
+        }
+
+        .half-width-chart-container {
+        width: 40vw; /* Esto limitará el contenedor de la gráfica al 50% del ancho de la ventana */
+        margin: auto; /* Esto centrará el contenedor si es más pequeño que el contenedor padre */
+        }
+
+        /* Agrega un estilo de parpadeo a las líneas de la gráfica */
+        /* Agrega un estilo de engrosamiento a las líneas de la gráfica */
+        .neon-line {
+            animation: neon-thicken 0.25s alternate infinite;
+            stroke-width: 2; /* Ancho de línea inicial */
+        }
+
+        /* Define la animación de engrosamiento */
+        @keyframes neon-thicken {
+            from {
+                stroke-width: 2; /* Ancho de línea inicial */
+            }
+            to {
+                stroke-width: 3; /* Aumenta ligeramente el ancho de línea */
+            }
+        }
+
+    </style>
+
+    <!-- JavaScript to fetch data and draw charts -->
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+    
+        function parseDateTime(dateTimeStr) {
+            return new Date(dateTimeStr);
+        }
+    
+        function drawCharts() {
+            fetch('/last_24_records_data')
+                .then(response => response.json())
+                .then(data => {
+                    drawLineChart(data);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    
+        function drawLineChart(data) {
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('datetime', 'Fecha');
+            dataTable.addColumn('number', 'Peso del Keke F1');
+            dataTable.addColumn('number', 'Peso del Keke F2');
+            dataTable.addColumn('number', 'Peso del Keke F3');
+    
+            var selectedFilter = document.querySelector('input[name="filter"]:checked').value;
+    
+            data.forEach(record => {
+                var date = parseDateTime(record.fecha);
+                var row = [date];
+                if (selectedFilter === "all" || selectedFilter === "p_keke_f1") {
+                    row.push(record.p_keke_f1);
+                } else {
+                    row.push(null);
+                }
+                if (selectedFilter === "all" || selectedFilter === "p_keke_f2") {
+                    row.push(record.p_keke_f2);
+                } else {
+                    row.push(null);
+                }
+                if (selectedFilter === "all" || selectedFilter === "p_keke_f3") {
+                    row.push(record.p_keke_f3);
+                } else {
+                    row.push(null);
+                }
+                dataTable.addRow(row);
+            });
+    
+            var options = {
+                title: 'PESO DEL KEKE',
+                curveType: 'function',
+                legend: { position: 'bottom' },
+                hAxis: {
+                    title: 'Hora del día',
+                    format: 'HH:mm',
+                    textStyle: { color: '#000000' },
+                    gridlines: { count: -1, units: { hours: { format: ['HH:mm'] } } }
+                },
+                vAxis: { 
+                    title: 'Kg/h', 
+                    textStyle: { color: '#000000' }
+                },
+                backgroundColor: '#ffffff',
+                titleTextStyle: { color: 'black' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('line-chart-div'));
+            chart.draw(dataTable, options);
+
+            // Agrega la clase 'neon-line' a las líneas de la gráfica
+            var svg = document.querySelector('#line-chart-div svg');
+            var paths = svg.querySelectorAll('path'); // Selecciona todas las líneas
+            paths.forEach(path => {
+                path.classList.add('neon-line');
+            });
+    
+            
+        }
+
+        function drawCycleChart() {
+            fetch('/last_24_cycle_data')
+                .then(response => response.json())
+                .then(data => {
+                    var dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('datetime', 'Fecha');
+                    dataTable.addColumn('number', 'Ciclo F1');
+                    dataTable.addColumn('number', 'Ciclo F2');
+                    dataTable.addColumn('number', 'Ciclo F3');
+
+                    var selectedFilter = document.querySelector('input[name="cycleFilter"]:checked').value;
+
+                    data.forEach(record => {
+                        var date = parseDateTime(record.fecha);
+                        var row = [date];
+                        if (selectedFilter === "all" || selectedFilter === "n_cic_f1") {
+                            row.push(record.n_cic_f1);
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all" || selectedFilter === "n_cic_f2") {
+                            row.push(record.n_cic_f2);
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all" || selectedFilter === "n_cic_f3") {
+                            row.push(record.n_cic_f3);
+                        } else {
+                            row.push(null);
+                        }
+                        dataTable.addRow(row);
+                    });
+
+                    var options = {
+                        title: 'Ciclos por Filtro',
+                        curveType: 'function',
+                        legend: { position: 'bottom' },
+                        hAxis: { title: 'Fecha', format: 'dd/MM/yyyy HH:mm' },
+                        vAxis: { title: 'Número de Ciclos' }
+                    };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('cycle-chart-div'));
+                    chart.draw(dataTable, options);
+
+                    // Agrega la clase 'neon-line' a las líneas de la gráfica
+                    var svg = document.querySelector('#cycle-chart-div svg');
+                    var paths = svg.querySelectorAll('path'); // Selecciona todas las líneas
+                    paths.forEach(path => {
+                        path.classList.add('neon-line');
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+            }
+
+        
+
+        // Asegúrate de que esta línea está al final del bloque de script para que todas las funciones estén definidas antes de llamarlas
+        google.charts.setOnLoadCallback(drawCycleChart);
+       
+
+    </script>
+    <script type="text/javascript">
+        // ... (código JavaScript anterior) ...
+    
+        function drawAverageCycleTimeChart() {
+            fetch('/average_cycle_time_data')
+                .then(response => response.json())
+                .then(data => {
+                    var dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('datetime', 'Fecha');
+                    dataTable.addColumn('number', 'Promedio Ciclo F1');
+                    dataTable.addColumn('number', 'Promedio Ciclo F2');
+                    dataTable.addColumn('number', 'Promedio Ciclo F3');
+
+                    var selectedFilter = document.querySelector('input[name="cycleFilter2"]:checked').value; // Cambiar a 'cycleFilter2'
+
+                    data.forEach(record => {
+                        var date = parseDateTime(record.fecha);
+                        var row = [date];
+                        if (selectedFilter === "all" || selectedFilter === "prom_cic_f1") {
+                            row.push(record.prom_cic_f1); // Cambiar a 'prom_cic_f1'
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all" || selectedFilter === "prom_cic_f2") {
+                            row.push(record.prom_cic_f2); // Cambiar a 'prom_cic_f2'
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all" || selectedFilter === "prom_cic_f3") {
+                            row.push(record.prom_cic_f3); // Cambiar a 'prom_cic_f3'
+                        } else {
+                            row.push(null);
+                        }
+                        dataTable.addRow(row);
+                    });
+
+                    var options = {
+                        title: 'Promedio Tiempo Ciclo',
+                        curveType: 'function',
+                        legend: { position: 'bottom' },
+                        hAxis: { title: 'Fecha', format: 'dd/MM/yyyy HH:mm' },
+                        vAxis: { title: 'Tiempo promedio' }
+                    };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('average-cycle-time-chart-div'));
+                    chart.draw(dataTable, options);
+
+                    // Agrega la clase 'neon-line' a las líneas de la gráfica
+                    var svg = document.querySelector('#average-cycle-time-chart-div svg');
+                    var paths = svg.querySelectorAll('path'); // Selecciona todas las líneas
+                    paths.forEach(path => {
+                        path.classList.add('neon-line');
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+    
+        // Agregar esta llamada a la función al final del bloque de script
+        google.charts.setOnLoadCallback(drawAverageCycleTimeChart);
+    
+    </script>
+    
+    <script type="text/javascript">
+        // ... (código JavaScript anterior) ...
+    
+        function drawCharts_niveltk() {
+            fetch('/drawCharts_niveltk')
+                .then(response => response.json())
+                .then(data => {
+                    var dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('datetime', 'Fecha');
+                    dataTable.addColumn('number', 'Nivel TK001');
+                    dataTable.addColumn('number', 'Nivel TK002');
+                     
+
+                    var selectedFilter = document.querySelector('input[name="filter_niveltk"]:checked').value; // Cambiar a 'cycleFilter2'
+
+                    data.forEach(record => {
+                        var date = parseDateTime(record.fecha);
+                        var row = [date];
+                        if (selectedFilter === "all_nivel" || selectedFilter === "nivel_tk1") {
+                            row.push(record.lit_tk_001);  
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all_nivel" || selectedFilter === "nivel_tk2") {
+                            row.push(record.lit_tk_002);  
+                        } else {
+                            row.push(null);
+                        }
+                        
+                        dataTable.addRow(row);
+                    });
+
+                    var options = {
+                        title: 'Nivel de Tanque',
+                        curveType: 'function',
+                        legend: { position: 'bottom' },
+                        hAxis: { title: 'Fecha', format: 'dd/MM/yyyy HH:mm' },
+                        vAxis: { title: 'Nivel de Tanque' }
+                    };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('nivel_tk'));
+                    chart.draw(dataTable, options);
+
+                    // Agrega la clase 'neon-line' a las líneas de la gráfica
+                    var svg = document.querySelector('#nivel_tk svg');
+                    var paths = svg.querySelectorAll('path'); // Selecciona todas las líneas
+                    paths.forEach(path => {
+                        path.classList.add('neon-line');
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Agregar esta llamada a la función al final del bloque de script
+        google.charts.setOnLoadCallback(drawCharts_niveltk);
+    
+    </script>
+    
+
+    <script type="text/javascript">
+        // ... (código JavaScript anterior) ...
+    
+        function drawCharts_t_fil() {
+            fetch('/drawCharts_t_fil')
+                .then(response => response.json())
+                .then(data => {
+                    var dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('datetime', 'Fecha');
+                    dataTable.addColumn('number', 'T. Filtrado 1');
+                    dataTable.addColumn('number', 'T. Filtrado 2');
+                    dataTable.addColumn('number', 'T. Filtrado 3');
+                     
+
+                    var selectedFilter = document.querySelector('input[name="t_fil"]:checked').value; // Cambiar a 'cycleFilter2'
+
+                    data.forEach(record => {
+                        var date = parseDateTime(record.fecha);
+                        var row = [date];
+                        if (selectedFilter === "all_t_fil" || selectedFilter === "t_fil1") {
+                            row.push(record.t_filt_f1);  
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all_t_fil" || selectedFilter === "t_fil2") {
+                            row.push(record.t_filt_f2);  
+                        } else {
+                            row.push(null);
+                        }
+                        if (selectedFilter === "all_t_fil" || selectedFilter === "t_fil3") {
+                            row.push(record.t_filt_f3);  
+                        } else {
+                            row.push(null);
+                        }
+                        dataTable.addRow(row);
+                    });
+
+                    var options = {
+                        title: 'T. Filtrado',
+                        curveType: 'function',
+                        legend: { position: 'bottom' },
+                        hAxis: { title: 'Fecha', format: 'dd/MM/yyyy HH:mm' },
+                        vAxis: { title: 'T. Filtrado' }
+                    };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('tiempo_filtrado'));
+                    chart.draw(dataTable, options);
+
+                    // Agrega la clase 'neon-line' a las líneas de la gráfica
+                    var svg = document.querySelector('#tiempo_filtrado svg');
+                    var paths = svg.querySelectorAll('path'); // Selecciona todas las líneas
+                    paths.forEach(path => {
+                        path.classList.add('neon-line');
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Agregar esta llamada a la función al final del bloque de script
+        google.charts.setOnLoadCallback(drawCharts_t_fil);
+    
+    </script>
+    
+</head>
+<body>
+    <div class="header">
+        <div class="titulo">><br><br>Resumen - Área de Filtros de Concentrado de Cobre</div>
+        <img src="{{ url_for('send_image', filename='1.png') }}" alt="Company Logo" class="logo">
+    </div>
+
+  
+    <div class="row mx-0"> <!-- Grafica Keke -->
+        <div class="col-lg-12">
+            <div class="cuadrante">
+                <div class="chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="all" name="filter" value="all" checked onclick="drawCharts()">
+                        <label for="all">Todos</label>
+                
+                        <input type="radio" id="p_keke_f1" name="filter" value="p_keke_f1" onclick="drawCharts()">
+                        <label for="p_keke_f1">P Keke F1</label>
+                
+                        <input type="radio" id="p_keke_f2" name="filter" value="p_keke_f2" onclick="drawCharts()">
+                        <label for="p_keke_f2">P Keke F2</label>
+                
+                        <input type="radio" id="p_keke_f3" name="filter" value="p_keke_f3" onclick="drawCharts()">
+                        <label for="p_keke_f3">P Keke F3</label>
+                    </div>
+                    <div id="line-chart-div" style="width: 100%; height: 250px;"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mx-0"> <!-- Grafica ciclos -->
+        <div class="col-lg-6">
+            <div class="cuadrante">
+                <div class="half-width-chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="allCycles" name="cycleFilter" value="all" checked onclick="drawCycleChart()">
+                        <label for="allCycles">Todos</label>
+
+                        <input type="radio" id="n_cic_f1" name="cycleFilter" value="n_cic_f1" onclick="drawCycleChart()">
+                        <label for="n_cic_f1">Ciclo F1</label>
+
+                        <input type="radio" id="n_cic_f2" name="cycleFilter" value="n_cic_f2" onclick="drawCycleChart()">
+                        <label for="n_cic_f2">Ciclo F2</label>
+
+                        <input type="radio" id="n_cic_f3" name="cycleFilter" value="n_cic_f3" onclick="drawCycleChart()">
+                        <label for="n_cic_f3">Ciclo F3</label>
+                    </div>
+                    <div id="cycle-chart-div" style="width: 100%; height: 250px;"></div>
+                </div>               
+            </div>
+        </div>
+         
+        <div class="col-lg-6">
+            <div class="cuadrante">
+                <div class="half-width-chart-container">
+                    <!-- Gráfica de Promedio de Tiempo de Ciclo -->
+                    <div class="radio-buttons">
+                        <input type="radio" id="allCycles2" name="cycleFilter2" value="all" checked onclick="drawAverageCycleTimeChart()">
+                        <label for="allCycles2">Todos</label>
+
+                        <input type="radio" id="prom_cic_f1" name="cycleFilter2" value="prom_cic_f1" onclick="drawAverageCycleTimeChart()">
+                        <label for="prom_cic_f1">Ciclo F1</label>
+
+                        <input type="radio" id="prom_cic_f2" name="cycleFilter2" value="prom_cic_f2" onclick="drawAverageCycleTimeChart()">
+                        <label for="prom_cic_f2">Ciclo F2</label>
+
+                        <input type="radio" id="prom_cic_f3" name="cycleFilter2" value="prom_cic_f3" onclick="drawAverageCycleTimeChart()">
+                        <label for="prom_cic_f3">Ciclo F3</label>
+                    </div>
+                    <div id="average-cycle-time-chart-div" style="width: 100%; height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <div class="row mx-0"> <!-- Grafica Keke -->
+        <div class="col-lg-12">
+            <div class="cuadrante">
+                <div class="chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="all_nivel" name="filter_niveltk" value="all_nivel" checked onclick="drawCharts_niveltk()">
+                        <label for="all">Todos</label>
+                
+                        <input type="radio" id="nivel_tk1" name="filter_niveltk" value="nivel_tk1" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk1">Nivel TK001</label>
+                
+                        <input type="radio" id="nivel_tk2" name="filter_niveltk" value="nivel_tk2" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk2">Nivel TK002</label>
+                
+                         
+                    </div>
+                    <div id="nivel_tk" style="width: 100%; height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <div class="row mx-0"> <!-- Grafica Keke -->
+        <div class="col-lg-4">
+            <div class="cuadrante">
+                <div class="chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="all_t_fil" name="t_fil" value="all_t_fil" checked onclick="drawCharts_t_fil()">
+                        <label for="all_t_fil">Todos</label>
+                
+                        <input type="radio" id="t_fil1" name="t_fil" value="t_fil1" onclick="drawCharts_t_fil()">
+                        <label for="t_fil1">T. Filtrado F1</label>
+                
+                        <input type="radio" id="t_fil2" name="t_fil" value="t_fil2" onclick="drawCharts_t_fil()">
+                        <label for="t_fil2">T. Filtrado F2</label>
+
+                        <input type="radio" id="t_fil3" name="t_fil" value="t_fil3" onclick="drawCharts_t_fil()">
+                        <label for="t_fil3">T. Filtrado F3</label>
+                
+                         
+                    </div>
+                    <div id="tiempo_filtrado" style="width: 100%; height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="cuadrante">
+                <div class="chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="all_nivel" name="filter_niveltk" value="all_nivel" checked onclick="drawCharts_niveltk()">
+                        <label for="all">Todos</label>
+                
+                        <input type="radio" id="nivel_tk1" name="filter_niveltk" value="nivel_tk1" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk1">Nivel TK001</label>
+                
+                        <input type="radio" id="nivel_tk2" name="filter_niveltk" value="nivel_tk2" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk2">Nivel TK002</label>
+                
+                         
+                    </div>
+                    <div id="tiempo_secado" style="width: 100%; height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="cuadrante">
+                <div class="chart-container">
+                    <!-- This div will contain the line chart -->
+
+                    <div class="radio-buttons">
+                        <input type="radio" id="all_nivel" name="filter_niveltk" value="all_nivel" checked onclick="drawCharts_niveltk()">
+                        <label for="all">Todos</label>
+                
+                        <input type="radio" id="nivel_tk1" name="filter_niveltk" value="nivel_tk1" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk1">Nivel TK001</label>
+                
+                        <input type="radio" id="nivel_tk2" name="filter_niveltk" value="nivel_tk2" onclick="drawCharts_niveltk()">
+                        <label for="nivel_tk2">Nivel TK002</label>
+                
+                         
+                    </div>
+                    <div id="tiempo_prensado" style="width: 100%; height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu button and panel -->
+    <div class="menu-btn">☰</div>
+    <div class="menu-panel">
+        <a href="/">Inicio</a>
+        <a href="/resumen">Resumen ejecutivo</a>
+        <a href="/kpis">KPIs principales a primera vista</a>
+        <a href="#current-analysis">Análisis Actual</a>
+        <a href="#production">Producción</a>
+        <a href="#processed-tons">Toneladas procesadas</a>
+        <a href="#average-cycle-time">Tiempo de ciclo promedio</a>
+        <a href="#equipment-availability">Disponibilidad y utilización de equipos</a>
+    </div>
+
+
+
+
+</body>
+</html>
